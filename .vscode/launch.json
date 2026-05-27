@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Kernel",
+            "preLaunchTask": "Build Kernel and Run QEMU",
+            "targetCreateCommands": [
+                "target create ${workspaceFolder}/target/riscv64gc-unknown-none-elf/debug/LicheeRV-Nano-Kernel"
+            ],
+            "processCreateCommands": [
+                "gdb-remote localhost:1234",
+            ],
+        }
+    ]
+}

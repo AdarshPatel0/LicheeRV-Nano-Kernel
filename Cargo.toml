@@ -1,0 +1,8 @@
+[package]
+name = "LicheeRV-Nano-Kernel"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sbi = { version = "0.3.0" }
+riscv = { version = "0.16.0", features = ["s-mode"] }
