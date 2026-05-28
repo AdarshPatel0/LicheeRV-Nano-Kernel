@@ -12,7 +12,7 @@ core::arch::global_asm!(
 );
 
 #[unsafe(no_mangle)]
-extern "C" fn kmain(_hart_id: usize, _device_tree_binary_ptr: usize) -> ! {
+extern "C" fn kmain() -> ! {
     loop {
         riscv::asm::wfi();
     }

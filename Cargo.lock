@@ -7,7 +7,6 @@ name = "LicheeRV-Nano-Kernel"
 version = "0.1.0"
 dependencies = [
  "riscv",
- "sbi",
 ]
 
 [[package]]
@@ -75,12 +74,6 @@ name = "riscv-types"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3f2ad9f15a07f4a0e1677124f9120ce7e83ab7e1ca7186af0ca9da529b62e80"
-
-[[package]]
-name = "sbi"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c64a569a412de4ad7b123f429e434751d74dd7ed25654af962b93c4d1cd584e"
 
 [[package]]
 name = "syn"
