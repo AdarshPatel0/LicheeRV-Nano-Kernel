@@ -9,6 +9,7 @@ runner = """qemu-system-riscv64 \
   -nographic \
   -bios none \
   -s -S \
+  -device loader,file=target/riscv64gc-unknown-none-elf/debug/LicheeRV-Nano-Kernel,addr=0x80200000 \
   -kernel"""
 rustflags = [
   "-C", "link-arg=-T./linker.ld",

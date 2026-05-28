@@ -5,4 +5,4 @@ sudo apt install -y \
     qemu-system-riscv64 \
 
 rustup default stable 
-rustup target add riscv64gc-unknown-linux-gnu
+rustup target add riscv64gc-unknown-none-elf
