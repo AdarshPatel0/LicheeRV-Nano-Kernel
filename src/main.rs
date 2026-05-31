@@ -3,6 +3,7 @@
 
 mod context;
 mod ecall;
+mod print;
 mod timer_interrupt;
 mod trap_handler;
 
@@ -17,7 +18,7 @@ core::arch::global_asm!(
 );
 
 #[unsafe(no_mangle)]
-extern "C" fn kmain() -> ! {
+extern "C" fn kmain(_hartid: usize, _device_tree_binary: usize) -> ! {
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
         use riscv::{
@@ -39,8 +40,11 @@ extern "C" fn kmain() -> ! {
 }
 
 #[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {
-        riscv::asm::wfi();
-    }
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    print::print!("{}", info);
+    let _ = sbi::system_reset::system_reset(
+        sbi::system_reset::ResetType::Shutdown,
+        sbi::system_reset::ResetReason::SystemFailure,
+    );
+    loop {}
 }
