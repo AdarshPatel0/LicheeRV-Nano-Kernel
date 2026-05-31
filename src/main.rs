@@ -19,6 +19,11 @@ core::arch::global_asm!(
 
 #[unsafe(no_mangle)]
 extern "C" fn kmain(_hartid: usize, _device_tree_binary: usize) -> ! {
+    sbi::system_reset::system_reset(
+        sbi::system_reset::ResetType::Shutdown,
+        sbi::system_reset::ResetReason::NoReason,
+    )
+    .unwrap();
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
         use riscv::{
