@@ -2,9 +2,9 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Run QEMU",
+			"label": "Build Kernel and Run QEMU",
 			"type": "shell",
-			"command": "cargo run",
+			"command": "cargo build && ./run-qemu.sh",
 			"isBackground": true,
 			"problemMatcher": {
                 "pattern": { "regexp": "." },
@@ -15,15 +15,5 @@
                 }
             }
 		},
-		{
-			"label": "Build Kernel",
-			"type": "shell",
-			"command": "cargo build",
-		},
-		{
-			"label": "Build Kernel and Run QEMU",
-			"dependsOn": ["Build Kernel", "Run QEMU"],
-			"dependsOrder": "sequence"
-		}
 	]
 }

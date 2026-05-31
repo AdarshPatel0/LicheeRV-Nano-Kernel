@@ -1,0 +1,1 @@
+mcopy -i disk.img target/riscv64gc-unknown-none-elf/debug/LicheeRV-Nano-Kernel ::/

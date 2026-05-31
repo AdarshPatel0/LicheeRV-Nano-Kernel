@@ -3,8 +3,6 @@
 pub unsafe extern "C" fn trap_handler_entry() {
     core::arch::naked_asm!(
         r#"
-        csrrw   sp,     sscratch,   sp
-
         addi    sp,     sp,     -528
 
         sd      ra,     0*8(sp)
@@ -87,10 +85,8 @@ pub unsafe extern "C" fn trap_handler_entry() {
         sd      t0,     1*8(sp)
 
         addi    t0,     sp,     528
+        sd      t0,     1*8(sp)
 
-        csrw    sscratch,   t0
-
-        mv      a0,     sp
         call    trap_handler
 
         ld      t0,     63*8(sp)

@@ -2,13 +2,6 @@
 target = "riscv64gc-unknown-none-elf"
 
 [target.riscv64gc-unknown-none-elf]
-runner = """qemu-system-riscv64 \
-  -m 64M \
-  -machine virt \
-  -smp 1 \
-  -nographic \
-  -s -S \
-  -kernel"""
 rustflags = [
   "-C", "link-arg=-T./linker.ld",
 ]
