@@ -40,7 +40,7 @@ extern "C" fn kmain(_hartid: usize, _device_tree_binary: usize) -> ! {
     let sdmmc = unsafe { Sdmmc::new(SD_DRIVER_BASE, TOP_BASE) };
     sdmmc.init().unwrap();
     let buf = "Hello World!".as_bytes();
-    sdmmc.write_block(0, &buf).unwrap();
+    sdmmc.write_block(10000000, &buf).unwrap();
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
         use riscv::{
