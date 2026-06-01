@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+buddy_system_allocator = "0.13.0"
 riscv = { version = "0.16.0", features = ["s-mode"] }
 sbi = "0.3.0"
+sg200x-bsp = { version = "0.6.0", features = ["device-mode", "device-cdc-acm"] }
