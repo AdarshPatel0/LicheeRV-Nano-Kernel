@@ -10,10 +10,6 @@ pub struct Context {
     pub a: [usize; 8],
     pub s: [usize; 12],
 
-    pub f: [u64; 32],
-    pub fcsr: u32,
-    pub _pad: u32,
-
     pub sstatus: usize,
     pub sepc: usize,
 }

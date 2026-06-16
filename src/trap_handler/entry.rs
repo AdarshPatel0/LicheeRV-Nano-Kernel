@@ -40,62 +40,20 @@ pub unsafe extern "C" fn trap_handler_entry() {
         sd      s10,    29*8(sp)
         sd      s11,    30*8(sp)
 
-        fsd     f0,     31*8(sp)
-        fsd     f1,     32*8(sp)
-        fsd     f2,     33*8(sp)
-        fsd     f3,     34*8(sp)
-        fsd     f4,     35*8(sp)
-        fsd     f5,     36*8(sp)
-        fsd     f6,     37*8(sp)
-        fsd     f7,     38*8(sp)
-        fsd     f8,     39*8(sp)
-        fsd     f9,     40*8(sp)
-        fsd     f10,    41*8(sp)
-        fsd     f11,    42*8(sp)
-        fsd     f12,    43*8(sp)
-        fsd     f13,    44*8(sp)
-        fsd     f14,    45*8(sp)
-        fsd     f15,    46*8(sp)
-        fsd     f16,    47*8(sp)
-        fsd     f17,    48*8(sp)
-        fsd     f18,    49*8(sp)
-        fsd     f19,    50*8(sp)
-        fsd     f20,    51*8(sp)
-        fsd     f21,    52*8(sp)
-        fsd     f22,    53*8(sp)
-        fsd     f23,    54*8(sp)
-        fsd     f24,    55*8(sp)
-        fsd     f25,    56*8(sp)
-        fsd     f26,    57*8(sp)
-        fsd     f27,    58*8(sp)
-        fsd     f28,    59*8(sp)
-        fsd     f29,    60*8(sp)
-        fsd     f30,    61*8(sp)
-        fsd     f31,    62*8(sp)
-
-        csrr    t0,     fcsr
-        sd      t0,     63*8(sp)
-
         csrr    t0,     sstatus
-        sd      t0,     64*8(sp)
+        sd      t0,     31*8(sp)
         csrr    t0,     sepc
-        sd      t0,     65*8(sp)
-
-        csrr    t0,     sscratch
-        sd      t0,     1*8(sp)
+        sd      t0,     32*8(sp)
 
         addi    t0,     sp,     528
         sd      t0,     1*8(sp)
 
         call    trap_handler
 
-        ld      t0,     63*8(sp)
-        csrw    fcsr,   t0
-
-        ld      t0,     64*8(sp)
+        ld      t0,     31*8(sp)
         csrw    sstatus,    t0
 
-        ld      t0,     65*8(sp)
+        ld      t0,     32*8(sp)
         csrw    sepc,   t0
 
         ld      ra,     0*8(sp)
@@ -131,39 +89,6 @@ pub unsafe extern "C" fn trap_handler_entry() {
         ld      s9,     28*8(sp)
         ld      s10,    29*8(sp)
         ld      s11,    30*8(sp)
-
-        fld     f0,     31*8(sp)
-        fld     f1,     32*8(sp)
-        fld     f2,     33*8(sp)
-        fld     f3,     34*8(sp)
-        fld     f4,     35*8(sp)
-        fld     f5,     36*8(sp)
-        fld     f6,     37*8(sp)
-        fld     f7,     38*8(sp)
-        fld     f8,     39*8(sp)
-        fld     f9,     40*8(sp)
-        fld     f10,    41*8(sp)
-        fld     f11,    42*8(sp)
-        fld     f12,    43*8(sp)
-        fld     f13,    44*8(sp)
-        fld     f14,    45*8(sp)
-        fld     f15,    46*8(sp)
-        fld     f16,    47*8(sp)
-        fld     f17,    48*8(sp)
-        fld     f18,    49*8(sp)
-        fld     f19,    50*8(sp)
-        fld     f20,    51*8(sp)
-        fld     f21,    52*8(sp)
-        fld     f22,    53*8(sp)
-        fld     f23,    54*8(sp)
-        fld     f24,    55*8(sp)
-        fld     f25,    56*8(sp)
-        fld     f26,    57*8(sp)
-        fld     f27,    58*8(sp)
-        fld     f28,    59*8(sp)
-        fld     f29,    60*8(sp)
-        fld     f30,    61*8(sp)
-        fld     f31,    62*8(sp)
 
         ld      sp,     1*8(sp)
 
