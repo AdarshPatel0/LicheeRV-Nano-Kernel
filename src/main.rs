@@ -39,6 +39,7 @@ extern "C" fn kmain() -> ! {
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
     }
     timer_interrupt::update_timer();
+    print::println!("Kernel loaded");
     loop {
         riscv::asm::wfi();
     }

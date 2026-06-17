@@ -17,9 +17,9 @@
             }
 		},
 		{
-			"label": "Build & Flash Kernel",
+			"label": "Create Image",
 			"type": "shell",
-			"command": "./create-disk.sh"
+			"command": "./create-image.sh"
 		},
 		{
 			"label": "Test Machine",
