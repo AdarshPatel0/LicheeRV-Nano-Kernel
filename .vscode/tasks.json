@@ -6,6 +6,7 @@
 			"type": "shell",
 			"command": "cargo run",
 			"isBackground": true,
+			"dependsOn": ["Build & Flash Kernel"],
 			"problemMatcher": {
                 "pattern": { "regexp": "." },
                 "background": {
@@ -16,13 +17,13 @@
             }
 		},
 		{
-			"label": "Build Kernel",
+			"label": "Build & Flash Kernel",
 			"type": "shell",
-			"command": "cargo build",
+			"command": "cargo build && qemu-img create -f raw disk.img 1G && mkfs.vfat -F 32 disk.img && mcopy -i disk.img target/riscv64gc-unknown-none-elf/debug/LicheeRV-Nano-Kernel ::"
 		},
 		{
-			"label": "Build Kernel and Run QEMU",
-			"dependsOn": ["Build Kernel", "Run QEMU"],
+			"label": "Test Machine",
+			"dependsOn":["Build & Flash Kernel", "Run QEMU"],
 			"dependsOrder": "sequence"
 		}
 	]
