@@ -1,10 +1,6 @@
 #!/bin/sh
-set -e
-
-KERNEL="$1"
-
 exec qemu-system-riscv64 \
-  -m 64M \
+  -m 256M \
   -machine virt \
   -smp 1 \
   -nographic \
