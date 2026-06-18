@@ -23,7 +23,7 @@
 		},
 		{
 			"label": "Test Machine",
-			"dependsOn":["Build & Flash Kernel", "Run QEMU"],
+			"dependsOn":["Create Image", "Run QEMU"],
 			"dependsOrder": "sequence"
 		}
 	]
