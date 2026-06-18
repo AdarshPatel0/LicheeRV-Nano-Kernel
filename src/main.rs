@@ -23,7 +23,7 @@ unsafe extern "C" {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn kmain() -> ! {
+extern "C" fn kmain(_hart_id: usize, device_tree_binary_pointer: usize) -> ! {
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
         use riscv::{
@@ -39,7 +39,8 @@ extern "C" fn kmain() -> ! {
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
     }
     timer_interrupt::update_timer();
-    print::println!("Kernel loaded");
+    print::println!("Kernel loaded.");
+    print::println!("Device tree binary loaded at 0x{:x}",device_tree_binary_pointer);
     loop {
         riscv::asm::wfi();
     }
