@@ -1,6 +1,8 @@
 #![no_main]
 #![no_std]
 
+use crate::print::println;
+
 mod context;
 mod ecall;
 mod print;
@@ -23,7 +25,24 @@ unsafe extern "C" {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn kmain() -> ! {
+extern "C" fn kmain(_argc: usize, argv: *const *const core::ffi::c_char) -> ! {
+    let dtb_address_str = unsafe {
+        core::ffi::CStr::from_ptr(*argv.add(1))
+    }
+    .to_str()
+    .unwrap();
+
+    let fdt_address = usize::from_str_radix(dtb_address_str, 16).unwrap();
+
+    let fdt = unsafe {
+        let device_tree_binary_header = core::slice::from_raw_parts(fdt_address as *const u32, 40);
+        let total_size = device_tree_binary_header.get(1).unwrap();
+        let device_tree_binary_data = core::slice::from_raw_parts(fdt_address as *const u8, *total_size as usize);
+        fdt::Fdt::new(device_tree_binary_data).expect("Failed to parse full FDT")
+    };
+
+    println!("{:?}", fdt);
+
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
         use riscv::{
