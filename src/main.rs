@@ -70,8 +70,6 @@ extern "C" fn kmain(_argc: usize, argv: *const *const core::ffi::c_char) -> ! {
         println!("Supervisor timer interrupt enabled.");
     }
     timer_interrupt::update_timer();
-    println!("Shutting down...");
-    sbi::system_reset::system_reset(sbi::system_reset::ResetType::Shutdown, sbi::system_reset::ResetReason::NoReason).expect("Shutdown failed");
     loop {
         riscv::asm::wfi();
     }
