@@ -3,6 +3,15 @@
 version = 4
 
 [[package]]
+name = "buddy_system_allocator"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1af5a01adeeade54c9f5060300227a8ee64c05b6376f28e9b8ee3b72dd2056f"
+dependencies = [
+ "spin",
+]
+
+[[package]]
 name = "critical-section"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -24,6 +33,7 @@ checksum = "784a4df722dc6267a04af36895398f59d21d07dce47232adf31ec0ff2fa45e67"
 name = "kernel"
 version = "0.1.0"
 dependencies = [
+ "buddy_system_allocator",
  "fdt",
  "riscv",
  "sbi",
@@ -88,6 +98,12 @@ name = "sbi"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c64a569a412de4ad7b123f429e434751d74dd7ed25654af962b93c4d1cd584e"
+
+[[package]]
+name = "spin"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5fe4ccb98d9c292d56fec89a5e07da7fc4cf0dc11e156b41793132775d3e591"
 
 [[package]]
 name = "syn"
