@@ -2,7 +2,7 @@
 target = "riscv64gc-unknown-none-elf"
 
 [target.riscv64gc-unknown-none-elf]
-runner = "./run-qemu.sh"
+runner = ""
 rustflags = [
   "-C", "link-arg=-T./linker.ld",
 ]
