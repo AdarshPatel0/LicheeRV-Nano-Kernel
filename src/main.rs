@@ -15,7 +15,8 @@ unsafe extern "C" {
 }
 
 #[global_allocator]
-pub static HEAP: buddy_system_allocator::LockedHeap<32> = buddy_system_allocator::LockedHeap::<32>::empty();
+pub static HEAP: buddy_system_allocator::LockedHeap<32> =
+    buddy_system_allocator::LockedHeap::<32>::empty();
 
 core::arch::global_asm!(
     r#"
@@ -35,6 +36,8 @@ extern "C" fn kmain(_argc: usize, argv: *const *const core::ffi::c_char) -> ! {
 
     let fdt_address = usize::from_str_radix(dtb_address_str, 16).unwrap();
 
+    println!("Flattened device address: {:#x}", fdt_address);
+
     let fdt = unsafe {
         let device_tree_binary_header = core::slice::from_raw_parts(fdt_address as *const u32, 40);
         let total_size = device_tree_binary_header.get(1).unwrap();
@@ -50,10 +53,13 @@ extern "C" fn kmain(_argc: usize, argv: *const *const core::ffi::c_char) -> ! {
 
     unsafe {
         HEAP.force_unlock();
-        HEAP.lock().add_to_heap(kernel_end_address, base_address + size);
+        HEAP.lock()
+            .add_to_heap(kernel_end_address, base_address + size);
     };
 
-    println!("Heap initialized");
+    println!("Heap initialized:");
+    println!("\tStart: {:#x}", kernel_end_address);
+    println!("\tEnd: {:#x}", base_address + size);
 
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
@@ -65,11 +71,18 @@ extern "C" fn kmain(_argc: usize, argv: *const *const core::ffi::c_char) -> ! {
             trap_handler::entry::trap_handler_entry as *const u8 as usize,
             stvec::TrapMode::Direct,
         ));
+        println!(
+            "Supervisor trap: Direct@{:#x}",
+            trap_handler::entry::trap_handler_entry as *const u8 as usize
+        );
         interrupt::enable();
+        println!("Interrupts enabled.");
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
-        interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
+        println!("Supervisor timer interrupt enabled.");
     }
     timer_interrupt::update_timer();
+    println!("Shutting down...");
+    sbi::system_reset::system_reset(sbi::system_reset::ResetType::Shutdown, sbi::system_reset::ResetReason::NoReason).expect("Shutdown failed");
     loop {
         riscv::asm::wfi();
     }
