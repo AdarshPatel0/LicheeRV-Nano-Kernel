@@ -52,9 +52,7 @@ extern "C" fn kmain(_argc: usize, argv: *const *const core::ffi::c_char) -> ! {
         HEAP.lock().add_to_heap(kernel_end_address, base_address + size);
     };
 
-    println!("Heap initialized:");
-    println!("\tStart: {:#x}", kernel_end_address);
-    println!("\tEnd: {:#x}", base_address + size);
+    println!("Heap initialized:\n\tstart: {:#x}\n\tend: {:#x}", kernel_end_address, base_address + size);
 
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
@@ -63,13 +61,37 @@ extern "C" fn kmain(_argc: usize, argv: *const *const core::ffi::c_char) -> ! {
             register::{self, stvec},
         };
         register::stvec::write(riscv::register::stvec::Stvec::new(trap_handler::entry::trap_handler_entry as *const u8 as usize, stvec::TrapMode::Direct));
-        println!("Supervisor trap: Direct@{:#x}", trap_handler::entry::trap_handler_entry as *const u8 as usize);
+        println!("Supervisor trap entry: {:#x}", trap_handler::entry::trap_handler_entry as *const u8 as usize);
         interrupt::enable();
-        println!("Interrupts enabled.");
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
-        println!("Supervisor timer interrupt enabled.");
     }
     timer_interrupt::update_timer();
+    let sdmmc = {
+        use sg200x_bsp::sdmmc::Sdmmc;
+        use sg200x_bsp::soc::{SD_DRIVER_BASE, TOP_BASE};
+
+        let sdmmc = unsafe { Sdmmc::new(SD_DRIVER_BASE, TOP_BASE) };
+        sdmmc.init().unwrap();
+        sdmmc
+    };
+    println!("sdmmc capacity: \n\tbytes: {}\n\tblocks: {}", sdmmc.card_capacity_bytes(), sdmmc.card_capacity_blocks());
+    let mut mbr_data: [u8; 512] = [0; 512];
+    println!("Reading MBR data...");
+    match sdmmc.read_block_single(0, &mut mbr_data) {
+        Ok(_) => {},
+        Err(_) => {
+            println!("Error: Cannot read block 0");
+        },
+    }
+    println!("Getting MBR partitions...");
+    let mbr = mbrs::Mbr::try_from_bytes(&mbr_data).unwrap();
+    let partition_table = mbr.partition_table;
+    for entry in partition_table.entries {
+        if let Some(partition_information) = entry {
+            println!("{:?}", partition_information.part_type());
+        }
+    }
+    println!("Kernel initialization complete.");
     loop {
         riscv::asm::wfi();
     }
