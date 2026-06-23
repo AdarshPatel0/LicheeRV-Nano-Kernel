@@ -1,0 +1,35 @@
+/dts-v1/;
+
+/ {
+    description = "Simple image with single Linux kernel";
+    #address-cells = <1>;
+
+    images {
+        kernel {
+            description = "LicheeRV-Nano Kernel";
+            data = /incbin/("kernel.bin");
+            type = "kernel";
+            arch = "riscv";
+            os = "linux";
+            compression = "none";
+            load = <0x80200000>;
+            entry = <0x80200000>;
+        };
+        fdt {
+            description = "sg2002-licheerv-nano-b flattened device tree blob";
+            data = /incbin/("sg2002-licheerv-nano-b.dtb");
+            type = "flat_dt";
+            arch = "riscv";
+            compression = "none";
+        };
+    };
+
+    configurations {
+        default = "config";
+        config {
+            description = "Boot LicheeRV-Nano kernel";
+            kernel = "kernel";
+            fdt = "fdt";
+        };
+    };
+};

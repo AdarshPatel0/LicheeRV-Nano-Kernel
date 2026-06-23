@@ -9,5 +9,6 @@
     ],
     "rust-analyzer.rustc.source": "discover",
     "[rust]": {
-    }
+    },
+    "commentTranslate.hover.enabled": true
 }
