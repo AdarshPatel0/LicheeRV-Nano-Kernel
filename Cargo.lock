@@ -19,6 +19,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "buddy_system_allocator"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1af5a01adeeade54c9f5060300227a8ee64c05b6376f28e9b8ee3b72dd2056f"
+dependencies = [
+ "spin",
+]
+
+[[package]]
 name = "critical-section"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -40,6 +49,7 @@ checksum = "784a4df722dc6267a04af36895398f59d21d07dce47232adf31ec0ff2fa45e67"
 name = "kernel"
 version = "0.1.0"
 dependencies = [
+ "buddy_system_allocator",
  "fdt",
  "riscv",
  "sbi",
@@ -153,14 +163,20 @@ dependencies = [
 
 [[package]]
 name = "sg200x-bsp"
-version = "0.4.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28367232b766ac8d3c7a0532610bfad175fe7243712c3f705d543c3660c5e9b3"
+checksum = "1f964b84c5d4409059a332b84bda24bf31c472e1edd2e227353ddbf8b9471056"
 dependencies = [
  "bit-struct",
  "log",
  "tock-registers",
 ]
+
+[[package]]
+name = "spin"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5fe4ccb98d9c292d56fec89a5e07da7fc4cf0dc11e156b41793132775d3e591"
 
 [[package]]
 name = "syn"
