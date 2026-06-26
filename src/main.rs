@@ -16,8 +16,12 @@ unsafe extern "C" {
     static mut _bss_end: u8;
 }
 
+pub const TIME_QUANTA: u64 = 1_000_000;
+
 #[global_allocator]
 pub static HEAP: buddy_system_allocator::LockedHeap<32> = buddy_system_allocator::LockedHeap::<32>::empty();
+
+pub static FDT: spin::Once<fdt::Fdt> = spin::Once::new();
 
 core::arch::global_asm!(
     r#"
@@ -29,13 +33,15 @@ core::arch::global_asm!(
     "#
 );
 
-#[unsafe(no_mangle)]
-extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
+fn clear_bss() {
     let bss_start = &raw mut _bss_start;
     let bss_end = &raw mut _bss_end;
     let bss_size = (bss_end as usize) - (bss_start as usize);
     unsafe { core::ptr::write_bytes(bss_start, 0, bss_size) };
-    timer_interrupt::set_time_quanta(1_000_000);
+}
+
+fn setup_interrupts() {
+    timer_interrupt::set_time_quanta(TIME_QUANTA);
     unsafe {
         use riscv::{
             interrupt,
@@ -46,12 +52,18 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
     }
-    let fdt = unsafe {
+}
+
+fn set_fdt(fdt_address: usize) -> &'static fdt::Fdt<'static> {
+    FDT.call_once(|| unsafe {
         let device_tree_binary_header = core::slice::from_raw_parts(fdt_address as *const u32, 40);
         let total_size = device_tree_binary_header.get(1).unwrap();
         let device_tree_binary_data = core::slice::from_raw_parts(fdt_address as *const u8, *total_size as usize);
         fdt::Fdt::new(device_tree_binary_data).expect("Failed to parse full FDT")
-    };
+    })
+}
+
+fn initialize_heap(fdt: &fdt::Fdt) -> (usize, usize) {
     let memory = fdt.memory().regions().next().unwrap();
     let memory_base = memory.starting_address as usize;
     let memory_size = memory.size.unwrap();
@@ -60,7 +72,17 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
     unsafe {
         HEAP.lock().add_to_heap(heap_start, heap_end);
     }
-    println!("heap:\nstart: {:#x}\nend: {:#x}", heap_start, heap_end);
+    (heap_start, heap_end)
+}
+
+#[unsafe(no_mangle)]
+extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
+    clear_bss();
+    setup_interrupts();
+    let fdt = set_fdt(fdt_address);
+    let (heap_start, heap_end) = initialize_heap(fdt);
+    println!("kernel started");
+    println!("system heap size: {} bytes", heap_end - heap_start);
     loop {
         riscv::asm::wfi();
     }

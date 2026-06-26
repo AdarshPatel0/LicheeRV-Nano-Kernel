@@ -1,6 +1,6 @@
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y rustup picocom lrzsz u-boot-tools
+sudo apt install -y rustup picocom lrzsz u-boot-tools device-tree-compiler
 
 rustup default stable
 rustup target add riscv64gc-unknown-none-elf

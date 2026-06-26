@@ -7,20 +7,20 @@
     images {
         kernel {
             description = "LicheeRV-Nano Kernel";
-            data = /incbin/("kernel.bin");
+            data = /incbin/("kernel.bin.xz");
             type = "kernel";
             arch = "riscv";
             os = "linux";
-            compression = "none";
+            compression = "xz";
             load = <0x80200000>;
             entry = <0x80200000>;
         };
         fdt {
             description = "sg2002-licheerv-nano-b flattened device tree blob";
-            data = /incbin/("sg2002-licheerv-nano-b.dtb");
+            data = /incbin/("sg2002-licheerv-nano-b.dtb.xz");
             type = "flat_dt";
             arch = "riscv";
-            compression = "none";
+            compression = "xz";
         };
     };
 

@@ -5,10 +5,9 @@ edition = "2024"
 
 [dependencies]
 buddy_system_allocator = "0.13.0"
-dma-api = "0.8.2"
 fdt = { version = "0.1.5", features = ["pretty-printing"] }
-mbrs = { version = "0.3.1", default-features = false, features = ["no-std"] }
 riscv = { version = "0.16.0", features = ["s-mode"] }
 sbi = "0.3.0"
 sdhci-host = "0.1.5"
 sdmmc-protocol = { version = "0.1.3", default-features = false, features = ["sdio"] }
+spin = "0.12.1"

@@ -1,3 +1,6 @@
 /target
 kernel.bin
-kernel.itb
+kernel.bin.xz
+sg2002-licheerv-nano-b.dtb
+sg2002-licheerv-nano-b.dtb.xz
+image.itb
