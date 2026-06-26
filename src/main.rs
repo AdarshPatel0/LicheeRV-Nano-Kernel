@@ -42,12 +42,11 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
             register::{self, stvec},
         };
         register::stvec::write(riscv::register::stvec::Stvec::new(trap_handler::entry::trap_handler_entry as *const u8 as usize, stvec::TrapMode::Direct));
-        println!("Supervisor trap entry: {:#x}", trap_handler::entry::trap_handler_entry as *const u8 as usize);
         interrupt::enable();
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
     }
-        let fdt = unsafe {
+    let fdt = unsafe {
         let device_tree_binary_header = core::slice::from_raw_parts(fdt_address as *const u32, 40);
         let total_size = device_tree_binary_header.get(1).unwrap();
         let device_tree_binary_data = core::slice::from_raw_parts(fdt_address as *const u8, *total_size as usize);
@@ -61,8 +60,7 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
     unsafe {
         HEAP.lock().add_to_heap(heap_start, heap_end);
     }
-    println!("Heap:\nstart: {:#x}\nend: {:#x}", heap_start, heap_end);
-    println!("Done.");
+    println!("heap:\nstart: {:#x}\nend: {:#x}", heap_start, heap_end);
     loop {
         riscv::asm::wfi();
     }
