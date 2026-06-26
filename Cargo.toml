@@ -8,4 +8,3 @@ buddy_system_allocator = "0.13.0"
 fdt = { version = "0.1.5", features = ["pretty-printing"] }
 riscv = { version = "0.16.0", features = ["s-mode"] }
 sbi = "0.3.0"
-sg200x-bsp = "0.6.0"

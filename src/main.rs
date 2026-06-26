@@ -33,8 +33,8 @@ core::arch::global_asm!(
 extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
     let bss_start = &raw mut _bss_start;
     let bss_end = &raw mut _bss_end;
-    let size = (bss_end as usize) - (bss_start as usize);
-    unsafe { core::ptr::write_bytes(bss_start, 0, size) };
+    let bss_size = (bss_end as usize) - (bss_start as usize);
+    unsafe { core::ptr::write_bytes(bss_start, 0, bss_size) };
     timer_interrupt::set_time_quanta(1_000_000);
     unsafe {
         use riscv::{
@@ -45,8 +45,9 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         println!("Supervisor trap entry: {:#x}", trap_handler::entry::trap_handler_entry as *const u8 as usize);
         interrupt::enable();
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
+        interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
     }
-    let fdt = unsafe {
+        let fdt = unsafe {
         let device_tree_binary_header = core::slice::from_raw_parts(fdt_address as *const u32, 40);
         let total_size = device_tree_binary_header.get(1).unwrap();
         let device_tree_binary_data = core::slice::from_raw_parts(fdt_address as *const u8, *total_size as usize);
@@ -60,16 +61,7 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
     unsafe {
         HEAP.lock().add_to_heap(heap_start, heap_end);
     }
-    println!("Heap:\nstart: {:#x}\nend:{:#x}", heap_start, heap_end);
-    {
-        use sg200x_bsp::sdmmc::Sdmmc;
-        use sg200x_bsp::soc::{SD_DRIVER_BASE, TOP_BASE};
-        let sdmmc = unsafe { Sdmmc::new(SD_DRIVER_BASE, TOP_BASE) };
-        sdmmc.init().unwrap();
-        println!("SDMMC initialized.");
-        let mut buf = [0u8; 512];
-        sdmmc.read_block(0, &mut buf).unwrap();
-    }
+    println!("Heap:\nstart: {:#x}\nend: {:#x}", heap_start, heap_end);
     println!("Done.");
     loop {
         riscv::asm::wfi();
