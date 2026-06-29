@@ -3,8 +3,8 @@ export PATH="$PATH:/home/vscode/.cargo/bin/"
 
 set -e
 
-rm -f sg2002-licheerv-nano-b.dtb.xz
-rm -f kernel.bin.xz
+rm -f sg2002-licheerv-nano-b.dtb.lzma
+rm -f kernel.bin.lzma
 
 dtc -I dts -O dtb -q -o sg2002-licheerv-nano-b.dtb sg2002-licheerv-nano-b.dts
 
@@ -12,8 +12,8 @@ rust-objcopy --strip-all -O binary \
   target/riscv64gc-unknown-none-elf/debug/kernel \
   kernel.bin
 
-xz -9 sg2002-licheerv-nano-b.dtb
-xz -9 kernel.bin
+lzma -9 sg2002-licheerv-nano-b.dtb
+lzma -9 kernel.bin
 
 mkimage -f image.its image.itb
 
