@@ -6,5 +6,10 @@ edition = "2024"
 [dependencies]
 buddy_system_allocator = "0.13.0"
 fdt = { version = "0.1.5", features = ["pretty-printing"] }
+mbrs = { version = "0.3.1", default-features = false, features = ["no-std"] }
 riscv = { version = "0.16.1", features = ["s-mode"] }
+rsext4 = "0.7.2"
 sbi = "0.3.0"
+sdhci-host = "0.2.0"
+sdmmc-protocol = { version = "0.2.0", default-features = false }
+spin = "0.12.1"

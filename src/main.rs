@@ -4,8 +4,10 @@
 mod context;
 mod ecall;
 mod print;
+mod sdmmc;
 mod timer_interrupt;
 mod trap_handler;
+mod filesystem;
 
 unsafe extern "C" {
     static _kernel_end: u8;
@@ -53,6 +55,21 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         let heap_start = &raw const _kernel_end as usize;
         let heap_end = memory_base + memory_size;
         unsafe { HEAP.lock().add_to_heap(heap_start, heap_end) };
+    }
+    // Initialize sd card and scan for paritions
+    {
+        let _card_info = sdmmc::initialize_card();
+        let mut mbr_raw = [0u8; 512];
+        sdmmc::read_blocks(0, &mut mbr_raw);
+        let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
+        for entry in mbr.partition_table.entries {
+            if let Some(partition) = entry {
+                if partition.part_type() == &mbrs::PartType::ext4() {
+                    filesystem::initialize_filesystem(partition.start_sector_lba(), partition.sector_count_lba() as u32);
+                    break;
+                }
+            }
+        }
     }
     // Setup timer and externel interrupts
     {

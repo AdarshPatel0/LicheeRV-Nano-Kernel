@@ -5,4 +5,5 @@ target = "riscv64gc-unknown-none-elf"
 runner = "./run.sh"
 rustflags = [
   "-C", "link-arg=-T./linker.ld",
+  "-C", "force-frame-pointers=yes"
 ]
