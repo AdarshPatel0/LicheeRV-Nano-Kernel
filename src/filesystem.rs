@@ -20,13 +20,13 @@ struct BlockDevice {
 
 impl rsext4::BlockDevice for BlockDevice {
     fn write(&mut self, buffer: &[u8], block_id: rsext4::bmalloc::AbsoluteBN, _count: u32) -> Ext4Result<()> {
-        let sector = block_id.to_u32().unwrap() + self.start_sector_lba;
+        let sector = block_id.to_u32().unwrap() * 4 + self.start_sector_lba;
         write_blocks(sector, buffer);
         Ok(())
     }
 
     fn read(&mut self, buffer: &mut [u8], block_id: rsext4::bmalloc::AbsoluteBN, _count: u32) -> Ext4Result<()> {
-        let sector = block_id.to_u32().unwrap() + self.start_sector_lba;
+        let sector = block_id.to_u32().unwrap() * 4 + self.start_sector_lba;
         read_blocks(sector, buffer);
         Ok(())
     }
@@ -40,7 +40,7 @@ impl rsext4::BlockDevice for BlockDevice {
     }
 
     fn total_blocks(&self) -> u64 {
-        self.sector_count_lba as u64
+        self.sector_count_lba as u64 / 4
     }
 
     fn current_time(&self) -> Ext4Result<Ext4Timestamp> {
