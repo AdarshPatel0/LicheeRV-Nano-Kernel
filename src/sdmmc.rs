@@ -1,7 +1,5 @@
 use spin::mutex;
 
-use crate::print::println;
-
 const SDIO_BASE_ADDRESS: usize = 0x4310000;
 
 static CARD: spin::Mutex<core::mem::MaybeUninit<sdmmc_protocol::sdio::SdioSdmmc<sdhci_host::Sdhci>>> = mutex::Mutex::new(core::mem::MaybeUninit::zeroed());
@@ -21,18 +19,28 @@ pub fn initialize_card() -> sdmmc_protocol::sdio::CardInfo {
     card_info
 }
 
-pub fn read_blocks(block: u32, buffer: &mut [u8]) {
+pub fn read_blocks(block_address: u32, buffer: &mut [u8]) {
+    assert!(buffer.len() % 512 == 0);
     let mut card_mutex = CARD.lock();
     let card = unsafe { &mut *card_mutex.as_mut_ptr() };
-    println!("reading {} bytes from block {}", buffer.len(), block);
-    let mut read_request = card.submit_read_blocks_into(block, buffer).unwrap();
-    while let sdmmc_protocol::DataCommandPoll::Pending = card.poll_data_request(&mut read_request).unwrap() {}
+    let block_count = buffer.len() / 512;
+    for block in 0..block_count {
+        let buffer_offset = block * 512;
+        let mut sub_buffer = &mut buffer[buffer_offset..buffer_offset + 512];
+        let mut read_request = card.submit_read_blocks_into(block as u32 + block_address, &mut sub_buffer).unwrap();
+        while let sdmmc_protocol::DataCommandPoll::Pending = card.poll_data_request(&mut read_request).unwrap() {}
+    }
 }
 
-pub fn write_blocks(block: u32, buffer: &[u8]) {
+pub fn write_blocks(block_address: u32, buffer: &[u8]) {
+    assert!(buffer.len() % 512 == 0);
     let mut card_mutex = CARD.lock();
     let card = unsafe { &mut *card_mutex.as_mut_ptr() };
-    println!("writing {} bytes to block {}", buffer.len(), block);
-    let mut write_request = card.submit_write_blocks_from(block, buffer).unwrap();
-    while let sdmmc_protocol::DataCommandPoll::Pending = card.poll_data_request(&mut write_request).unwrap() {}
+    let block_count = buffer.len() / 512;
+    for block in 0..block_count {
+        let buffer_offset = block * 512;
+        let mut sub_buffer = &buffer[buffer_offset..buffer_offset + 512];
+        let mut write_request = card.submit_write_blocks_from(block as u32 + block_address, &mut sub_buffer).unwrap();
+        while let sdmmc_protocol::DataCommandPoll::Pending = card.poll_data_request(&mut write_request).unwrap() {}
+    }
 }

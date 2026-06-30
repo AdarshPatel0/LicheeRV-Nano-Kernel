@@ -66,22 +66,19 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
     {
         let card_info = sdmmc::initialize_card();
         println!("total blocks: {}", card_info.capacity_blocks.unwrap());
-        let mut buffer = [0u8; 4096];
-        sdmmc::read_blocks(0, &mut buffer);
-        sdmmc::read_blocks(512, &mut buffer);
-        // let mut mbr_raw = [0u8; 512];
-        // sdmmc::read_blocks(0, &mut mbr_raw);
-        // let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
-        // for entry in mbr.partition_table.entries {
-        //     if let Some(partition) = entry {
-        //         if partition.part_type() == &mbrs::PartType::ext4() {
-        //             println!("partition start sector: {}", partition.start_sector_lba());
-        //             println!("partition sectors : {}", partition.sector_count_lba());
-        //             filesystem::initialize_filesystem(partition.start_sector_lba(), partition.sector_count_lba() as u32);
-        //             break;
-        //         }
-        //     }
-        // }
+        let mut mbr_raw = [0u8; 512];
+        sdmmc::read_blocks(0, &mut mbr_raw);
+        let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
+        for entry in mbr.partition_table.entries {
+            if let Some(partition) = entry {
+                if partition.part_type() == &mbrs::PartType::ext4() {
+                    println!("partition start sector: {}", partition.start_sector_lba());
+                    println!("partition sectors: {}", partition.sector_count_lba());
+                    filesystem::initialize_filesystem(partition.start_sector_lba(), partition.sector_count_lba() as u32);
+                    break;
+                }
+            }
+        }
     }
     // Setup timer and externel interrupts
     {
