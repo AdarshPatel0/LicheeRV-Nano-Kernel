@@ -1,4 +1,4 @@
-use crate::{context};
+use crate::context;
 
 pub fn call(context: &mut context::Context) {
     context.sepc = context.sepc + 4;

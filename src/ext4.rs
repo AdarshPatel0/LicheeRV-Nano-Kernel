@@ -1,16 +1,10 @@
 use crate::sdmmc::{read_blocks, write_blocks};
-use core::mem::MaybeUninit;
 use rsext4::{Ext4FileSystem, Ext4Result, Ext4Timestamp, Jbd2Dev};
-use spin::Mutex;
-
-pub static FILESYSTEM: Mutex<MaybeUninit<Ext4FileSystem>> = Mutex::new(MaybeUninit::uninit());
 
 pub fn initialize_filesystem(start_block: u32, block_count: u32) {
-    let mut filesystem_mutex = FILESYSTEM.lock();
     let block_device = BlockDevice { start_block, block_count };
     let mut journaling_block_device = Jbd2Dev::initial_jbd2dev(0, block_device, true);
     let filesystem = Ext4FileSystem::mount(&mut journaling_block_device).unwrap();
-    filesystem_mutex.write(filesystem);
 }
 
 struct BlockDevice {

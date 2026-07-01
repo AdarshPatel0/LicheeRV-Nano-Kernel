@@ -5,7 +5,7 @@ use crate::print::println;
 
 mod context;
 mod ecall;
-mod filesystem;
+mod ext4;
 mod print;
 mod sdmmc;
 mod timer_interrupt;
@@ -58,27 +58,9 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         let heap_end = memory_base + memory_size;
         unsafe { HEAP.lock().add_to_heap(heap_start, heap_end) };
         println!("heap initialized");
-        println!("start: {:#x}",heap_start);
-        println!("end: {:#x}",heap_end);
-        println!("size: {:#x}",heap_end - heap_start);
-    }
-    // Initialize sd card and scan for paritions
-    {
-        let card_info = sdmmc::initialize_card();
-        println!("total blocks: {}", card_info.capacity_blocks.unwrap());
-        let mut mbr_raw = [0u8; 512];
-        sdmmc::read_blocks(0, &mut mbr_raw);
-        let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
-        for entry in mbr.partition_table.entries {
-            if let Some(partition) = entry {
-                if partition.part_type() == &mbrs::PartType::ext4() {
-                    println!("partition start sector: {}", partition.start_sector_lba());
-                    println!("partition sectors: {}", partition.sector_count_lba());
-                    filesystem::initialize_filesystem(partition.start_sector_lba(), partition.sector_count_lba() as u32);
-                    break;
-                }
-            }
-        }
+        println!("start: {:#x}", heap_start);
+        println!("end: {:#x}", heap_end);
+        println!("size: {:#x}", heap_end - heap_start);
     }
     // Setup timer and externel interrupts
     {
@@ -94,6 +76,18 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
             interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
         }
     }
+    // Initialize sd card and scan for paritions
+    {
+        let card_info = sdmmc::initialize_card();
+        println!("total blocks: {}", card_info.capacity_blocks.unwrap());
+        let mut mbr_raw = [0u8; 512];
+        sdmmc::read_blocks(0, &mut mbr_raw);
+        let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
+        for entry in mbr.partition_table.entries {
+            if let Some(partition) = entry {
+            }
+        }
+    }
     println!("Kernel initialized");
     loop {
         riscv::asm::wfi();
@@ -104,5 +98,7 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
 fn panic(info: &core::panic::PanicInfo) -> ! {
     println!("{}", info);
     let _ = sbi::system_reset::system_reset(sbi::system_reset::ResetType::ColdReboot, sbi::system_reset::ResetReason::SystemFailure);
-    loop {riscv::asm::wfi();}
+    loop {
+        riscv::asm::wfi();
+    }
 }
