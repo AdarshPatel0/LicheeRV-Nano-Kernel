@@ -91,11 +91,11 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         };
         for entry in mbr.partition_table.entries {
             if let Some(partition) = entry {
-                let device_clone = block_device.clone();
                 let start_block = partition.start_sector_lba() as usize;
                 let block_count = partition.sector_count_lba() as usize;
-                let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(start_block, block_count, device_clone);
+                let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(start_block, block_count, block_device);
                 let _ext4_filesystem = drivers::filesystem::ext4::Ext4FileSystem::new(ext4_partition);
+                break;
             }
         }
     }

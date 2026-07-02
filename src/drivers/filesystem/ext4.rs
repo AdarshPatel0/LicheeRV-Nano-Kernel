@@ -28,13 +28,13 @@ impl<T: BlockDevice> Ext4Partition<T> {
 
 impl<T: BlockDevice> rsext4::BlockDevice for Ext4Partition<T> {
     fn write(&mut self, buffer: &[u8], block_id: rsext4::bmalloc::AbsoluteBN, _count: u32) -> rsext4::Ext4Result<()> {
-        let block_address = (block_id.as_usize().unwrap() * (rsext4::BLOCK_SIZE / self.block_size)) + self.start_block;
+        let block_address = (block_id.as_usize().unwrap() * 8 ) + self.start_block;
         self.block_device.write(block_address, buffer);
         Ok(())
     }
 
     fn read(&mut self, buffer: &mut [u8], block_id: rsext4::bmalloc::AbsoluteBN, _count: u32) -> rsext4::Ext4Result<()> {
-        let block_address = (block_id.as_usize().unwrap() * (rsext4::BLOCK_SIZE / self.block_size)) + self.start_block;
+        let block_address = (block_id.as_usize().unwrap() * 8 ) + self.start_block;
         self.block_device.read(block_address, buffer);
         Ok(())
     }
