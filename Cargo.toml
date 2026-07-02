@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+block_device = "0.1.3"
 buddy_system_allocator = "0.13.0"
+fat32 = "0.2.0"
 fdt = { version = "0.1.5", features = ["pretty-printing"] }
-genfs = "0.1.4"
 mbrs = { version = "0.3.1", default-features = false, features = ["no-std"] }
 riscv = { version = "0.16.1", features = ["s-mode"] }
 rsext4 = "0.7.2"
