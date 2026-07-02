@@ -3,10 +3,7 @@
 
 extern crate alloc;
 
-use crate::{
-    drivers::block_device::{self, BlockDevice},
-    print::println,
-};
+use crate::{drivers::block_device::BlockDevice, print::println};
 
 mod context;
 mod drivers;
@@ -83,19 +80,19 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         }
     }
     {
-        let block_device = alloc::rc::Rc::new(drivers::block_device::sdmmc::SdmmcBlockDevice::new(SDIO_BASE_ADDRESS));
-        let mbr = {
-            let mut mbr_data = [0u8; 512];
-            block_device.read(0, &mut mbr_data);
-            mbrs::Mbr::try_from_bytes(&mbr_data).unwrap()
-        };
+        let block_device = drivers::block_device::sdhci::SdhciBlockDevice::new(SDIO_BASE_ADDRESS);
+        println!("total blocks: {}", block_device.block_count());
+        let mut mbr_raw = [0u8; 512];
+        block_device.read(0, &mut mbr_raw);
+        let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
         for entry in mbr.partition_table.entries {
             if let Some(partition) = entry {
-                let start_block = partition.start_sector_lba() as usize;
-                let block_count = partition.sector_count_lba() as usize;
-                let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(start_block, block_count, block_device);
-                let _ext4_filesystem = drivers::filesystem::ext4::Ext4FileSystem::new(ext4_partition);
-                break;
+                if partition.part_type() == &mbrs::PartType::ext4() {
+                    let start_block = partition.start_sector_lba();
+                    let block_count = partition.sector_count_lba();
+                    let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(block_device.clone(), start_block as usize, block_count as usize);
+                    let ext4_filesystem = drivers::filesystem::ext4::Ext4FileSystem::new(ext4_partition);
+                }
             }
         }
     }
