@@ -7,6 +7,7 @@ use crate::drivers::block_device::BlockDevice;
 
 const BLOCK_SIZE: usize = 512;
 
+#[derive(Clone)]
 pub struct SdhciBlockDevice {
     card: Arc<Mutex<SdioSdmmc<Sdhci>>>,
     card_info: CardInfo,
@@ -59,11 +60,5 @@ impl BlockDevice for SdhciBlockDevice {
 
     fn block_count(&self) -> usize {
         self.card_info.capacity_blocks.unwrap() as usize
-    }
-}
-
-impl Clone for SdhciBlockDevice {
-    fn clone(&self) -> Self {
-        Self { card: self.card.clone(), card_info: self.card_info.clone() }
     }
 }

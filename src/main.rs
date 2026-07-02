@@ -87,11 +87,16 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
         for entry in mbr.partition_table.entries {
             if let Some(partition) = entry {
-                if partition.part_type() == &mbrs::PartType::ext4() {
-                    let start_block = partition.start_sector_lba();
-                    let block_count = partition.sector_count_lba();
-                    let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(block_device.clone(), start_block as usize, block_count as usize);
-                    let ext4_filesystem = drivers::filesystem::ext4::Ext4FileSystem::new(ext4_partition);
+                let start_block = partition.start_sector_lba();
+                let block_count = partition.sector_count_lba();
+                match partition.part_type() {
+                    mbrs::PartType::Fat32 { visible: _, scheme: _ } => {
+                    }
+                    mbrs::PartType::LinuxSwap => {
+                        let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(block_device.clone(), start_block as usize, block_count as usize);
+                        let ext4_filesystem = drivers::filesystem::ext4::Ext4FileSystem::new(ext4_partition);
+                    }
+                    _ => {}
                 }
             }
         }

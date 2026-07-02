@@ -1,7 +1,7 @@
 use crate::drivers::block_device::BlockDevice;
 
 pub struct Ext4FileSystem {
-    filesystem: rsext4::Ext4FileSystem,
+    pub filesystem: rsext4::Ext4FileSystem,
 }
 
 impl Ext4FileSystem {
@@ -12,17 +12,12 @@ impl Ext4FileSystem {
     }
 }
 
+#[derive(Clone)]
 pub struct Ext4Partition<T: BlockDevice> {
     block_device: T,
     start_block: usize,
     block_count: usize,
     scale_factor: usize,
-}
-
-impl<T: BlockDevice + Clone> Clone for Ext4Partition<T> {
-    fn clone(&self) -> Self {
-        Self { block_device: self.block_device.clone(), start_block: self.start_block.clone(), block_count: self.block_count.clone(), scale_factor: self.scale_factor.clone() }
-    }
 }
 
 impl<T: BlockDevice> Ext4Partition<T> {
