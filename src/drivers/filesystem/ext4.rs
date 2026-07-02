@@ -1,14 +1,15 @@
 use crate::drivers::block_device::BlockDevice;
 
-pub struct Ext4FileSystem {
+pub struct Ext4FileSystem<T: BlockDevice> {
     pub filesystem: rsext4::Ext4FileSystem,
+    pub jbd2_dev: rsext4::Jbd2Dev<Ext4Partition<T>>,
 }
 
-impl Ext4FileSystem {
-    pub fn new<T: BlockDevice>(ext4_partition: Ext4Partition<T>) -> Self {
-        let mut journaling_block_device = rsext4::Jbd2Dev::initial_jbd2dev(0, ext4_partition, true);
-        let filesystem = rsext4::Ext4FileSystem::mount(&mut journaling_block_device).unwrap();
-        Self { filesystem }
+impl<T: BlockDevice> Ext4FileSystem<T> {
+    pub fn new(ext4_partition: Ext4Partition<T>) -> Self {
+        let mut jbd2_dev = rsext4::Jbd2Dev::initial_jbd2dev(0, ext4_partition, true);
+        let filesystem = rsext4::Ext4FileSystem::mount(&mut jbd2_dev).unwrap();
+        Self { filesystem, jbd2_dev }
     }
 }
 
