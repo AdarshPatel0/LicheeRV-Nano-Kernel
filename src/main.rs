@@ -1,13 +1,17 @@
 #![no_main]
 #![no_std]
 
-use crate::print::println;
+extern crate alloc;
+
+use crate::{
+    drivers::block_device::{self, BlockDevice},
+    print::println,
+};
 
 mod context;
+mod drivers;
 mod ecall;
-mod ext4;
 mod print;
-mod sdmmc;
 mod timer_interrupt;
 mod trap_handler;
 
@@ -19,6 +23,8 @@ unsafe extern "C" {
 }
 
 pub const TIME_QUANTA: u64 = 1_000_000;
+
+const SDIO_BASE_ADDRESS: usize = 0x4310000;
 
 #[global_allocator]
 pub static HEAP: buddy_system_allocator::LockedHeap<32> = buddy_system_allocator::LockedHeap::<32>::empty();
@@ -76,15 +82,20 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
             interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
         }
     }
-    // Initialize sd card and scan for paritions
     {
-        let card_info = sdmmc::initialize_card();
-        println!("total blocks: {}", card_info.capacity_blocks.unwrap());
-        let mut mbr_raw = [0u8; 512];
-        sdmmc::read_blocks(0, &mut mbr_raw);
-        let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
+        let block_device = alloc::rc::Rc::new(drivers::block_device::sdmmc::SdmmcBlockDevice::new(SDIO_BASE_ADDRESS));
+        let mbr = {
+            let mut mbr_data = [0u8; 512];
+            block_device.read(0, &mut mbr_data);
+            mbrs::Mbr::try_from_bytes(&mbr_data).unwrap()
+        };
         for entry in mbr.partition_table.entries {
             if let Some(partition) = entry {
+                let device_clone = block_device.clone();
+                let start_block = partition.start_sector_lba() as usize;
+                let block_count = partition.sector_count_lba() as usize;
+                let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(start_block, block_count, device_clone);
+                let _ext4_filesystem = drivers::filesystem::ext4::Ext4FileSystem::new(ext4_partition);
             }
         }
     }

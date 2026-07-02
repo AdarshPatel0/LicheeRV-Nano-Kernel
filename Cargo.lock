@@ -168,11 +168,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "784a4df722dc6267a04af36895398f59d21d07dce47232adf31ec0ff2fa45e67"
 
 [[package]]
+name = "genfs"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65b9e52a0ffd4c2f11f9f84e8885a40cb99f490971eee78bbd7ddffd6ac023d6"
+
+[[package]]
 name = "kernel"
 version = "0.1.0"
 dependencies = [
  "buddy_system_allocator",
  "fdt",
+ "genfs",
  "mbrs",
  "riscv",
  "rsext4",
