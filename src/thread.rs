@@ -31,7 +31,7 @@ pub fn create_thread(entry: usize, privileged: bool, stack_size: usize, argument
     let mut queue = QUEUE.lock();
 
     let stack_address = unsafe { alloc(Layout::from_size_align(stack_size, 16).unwrap()) as usize };
-    let stack_top = (stack_address + stack_size - arguments.len()) & !15;
+    let stack_top = stack_address + stack_size - arguments.len();
 
     unsafe {
         core::ptr::copy(arguments.as_ptr(), stack_top as *mut u8, arguments.len());
