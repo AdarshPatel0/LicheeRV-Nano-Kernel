@@ -27,7 +27,7 @@ pub extern "C" fn hart_startup_entry() {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn hart_startup(hart_id: usize) -> ! {
+extern "C" fn hart_startup(hart_info: &mut HartInfo) -> ! {
     unsafe {
         stvec::write(Stvec::new(trap_handler_entry as *const u8 as usize, TrapMode::Direct));
         interrupt::enable();
@@ -35,7 +35,7 @@ extern "C" fn hart_startup(hart_id: usize) -> ! {
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
     }
-    println!("{}", hart_id);
+    println!("{}", hart_info.hart_id);
     loop {
         riscv::asm::wfi();
     }
