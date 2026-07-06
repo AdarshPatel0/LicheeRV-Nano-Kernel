@@ -30,6 +30,9 @@ impl SdhciBlockDevice {
 }
 
 impl BlockDevice for SdhciBlockDevice {
+
+    const BLOCK_SIZE: usize = 512;
+
     fn read(&self, block_address: usize, buffer: &mut [u8]) {
         assert!(buffer.len() % BLOCK_SIZE == 0);
         let mut card = self.card.lock();
@@ -53,11 +56,7 @@ impl BlockDevice for SdhciBlockDevice {
             while let sdmmc_protocol::DataCommandPoll::Pending = card.poll_data_request(&mut write_request).unwrap() {}
         }
     }
-
-    fn block_size(&self) -> usize {
-        BLOCK_SIZE
-    }
-
+    
     fn block_count(&self) -> usize {
         self.card_info.capacity_blocks.unwrap() as usize
     }

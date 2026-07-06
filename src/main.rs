@@ -3,13 +3,13 @@
 
 extern crate alloc;
 
-use crate::{drivers::block_device::BlockDevice, print::println};
+use crate::print::println;
 
 mod context;
 mod drivers;
 mod ecall;
 mod print;
-mod timer_interrupt;
+mod thread;
 mod trap_handler;
 
 unsafe extern "C" {
@@ -20,8 +20,6 @@ unsafe extern "C" {
 }
 
 pub const TIME_QUANTA: u64 = 1_000_000;
-
-const SDIO_BASE_ADDRESS: usize = 0x4310000;
 
 #[global_allocator]
 pub static HEAP: buddy_system_allocator::LockedHeap<32> = buddy_system_allocator::LockedHeap::<32>::empty();
@@ -65,43 +63,6 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         println!("end: {:#x}", heap_end);
         println!("size: {:#x}", heap_end - heap_start);
     }
-    // Setup timer and externel interrupts
-    {
-        timer_interrupt::set_time_quanta(TIME_QUANTA);
-        unsafe {
-            use riscv::{
-                interrupt,
-                register::{self, stvec},
-            };
-            register::stvec::write(riscv::register::stvec::Stvec::new(trap_handler::entry::trap_handler_entry as *const u8 as usize, stvec::TrapMode::Direct));
-            interrupt::enable();
-            interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
-            interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
-        }
-    }
-    {
-        let block_device = drivers::block_device::sdhci::SdhciBlockDevice::new(SDIO_BASE_ADDRESS);
-        println!("total blocks: {}", block_device.block_count());
-        let mut mbr_raw = [0u8; 512];
-        block_device.read(0, &mut mbr_raw);
-        let mbr = mbrs::Mbr::try_from_bytes(&mbr_raw).unwrap();
-        for entry in mbr.partition_table.entries {
-            if let Some(partition) = entry {
-                let start_block = partition.start_sector_lba();
-                let block_count = partition.sector_count_lba();
-                match partition.part_type() {
-                    mbrs::PartType::Fat32 { visible: _, scheme: _ } => {
-                    }
-                    mbrs::PartType::LinuxSwap => {
-                        let ext4_partition = drivers::filesystem::ext4::Ext4Partition::new(block_device.clone(), start_block as usize, block_count as usize);
-                        let ext4_filesystem = drivers::filesystem::ext4::Ext4FileSystem::new(ext4_partition);
-                    }
-                    _ => {}
-                }
-            }
-        }
-    }
-    println!("Kernel initialized");
     loop {
         riscv::asm::wfi();
     }

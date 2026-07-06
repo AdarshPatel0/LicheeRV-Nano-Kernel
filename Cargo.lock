@@ -88,12 +88,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4388bee8683e3d04af747c73422af53102d2bd24d9eadb6cbc100baef4b43f8"
 
 [[package]]
-name = "block_device"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34debcf14cf4dc2fe9031aa5cbb3b6e05d930a26dcbd657b102270b11456bed6"
-
-[[package]]
 name = "buddy_system_allocator"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -168,15 +162,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "361a90feb7004eca4019fb28352a9465666b24f840f5c3cddf0ff13920590b89"
 
 [[package]]
-name = "fat32"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04ade4c8dc650037c07d4d1d3329851b8bdbab0da8d2b83ac5d7114174702c17"
-dependencies = [
- "block_device",
-]
-
-[[package]]
 name = "fdt"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -186,9 +171,7 @@ checksum = "784a4df722dc6267a04af36895398f59d21d07dce47232adf31ec0ff2fa45e67"
 name = "kernel"
 version = "0.1.0"
 dependencies = [
- "block_device",
  "buddy_system_allocator",
- "fat32",
  "fdt",
  "mbrs",
  "riscv",
@@ -196,6 +179,7 @@ dependencies = [
  "sbi",
  "sdhci-host",
  "sdmmc-protocol",
+ "slab",
  "spin 0.12.1",
 ]
 
@@ -410,6 +394,12 @@ name = "semver"
 version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd"
+
+[[package]]
+name = "slab"
+version = "0.4.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
 name = "spin"

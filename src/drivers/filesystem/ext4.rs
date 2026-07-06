@@ -23,7 +23,7 @@ pub struct Ext4Partition<T: BlockDevice> {
 
 impl<T: BlockDevice> Ext4Partition<T> {
     pub fn new(block_device: T, start_block: usize, block_count: usize) -> Self {
-        let scale_factor = rsext4::BLOCK_SIZE / block_device.block_size();
+        let scale_factor = rsext4::BLOCK_SIZE / T::BLOCK_SIZE;
         Self { block_device, start_block, block_count, scale_factor }
     }
 }
@@ -58,7 +58,7 @@ impl<T: BlockDevice> rsext4::BlockDevice for Ext4Partition<T> {
     }
 
     fn block_size(&self) -> u32 {
-        self.block_device.block_size() as u32
+        T::BLOCK_SIZE as u32
     }
 
     fn flush(&mut self) -> rsext4::Ext4Result<()> {
