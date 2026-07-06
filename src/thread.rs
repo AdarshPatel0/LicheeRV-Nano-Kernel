@@ -6,7 +6,7 @@ use alloc::{alloc::{alloc, dealloc}, collections::vec_deque::VecDeque};
 use slab::Slab;
 use spin::Mutex;
 
-use crate::context::Context;
+use crate::{context::Context, hart::get_hart_info};
 
 static THREADS: Mutex<Slab<Thread>> = Mutex::new(Slab::new());
 static QUEUE: Mutex<VecDeque<usize>> = Mutex::new(VecDeque::new());
@@ -97,4 +97,42 @@ pub unsafe extern "C" fn wait() {
             j   wait_start
         "
     );
+}
+
+pub fn schedule(context: &mut Context) {
+    let mut threads = THREADS.lock();
+    let mut queue = QUEUE.lock();
+
+    let hart_info = get_hart_info();
+
+    if let Some(current_thread_id) = hart_info.current_thread_id {
+        if let Some(current_thread) = threads.get_mut(current_thread_id) {
+            queue.push_back(current_thread_id);
+            current_thread.context = *context;
+            if current_thread.status != ThreadStatus::Dead && current_thread.status != ThreadStatus::Blocking {
+                current_thread.status = ThreadStatus::Ready;
+            }
+        }
+    }
+
+    loop {
+        if let Some(new_thread_id) = queue.pop_front() {
+            if let Some(new_thread) = threads.get_mut(new_thread_id) {
+                if new_thread.status != ThreadStatus::Dead {
+                    *context = new_thread.context;
+                    hart_info.current_thread_id = Some(new_thread_id);
+                    new_thread.status = ThreadStatus::Running;
+                    return;
+                }
+            }
+        } else {
+            hart_info.current_thread_id = None;
+            context.sepc = wait as *const u8 as usize;
+            let mut sstatus = riscv::register::sstatus::read();
+            sstatus.set_spie(true);
+            sstatus.set_spp(riscv::register::sstatus::SPP::Supervisor);
+            context.sstatus = sstatus.bits();
+            return;
+        }
+    }
 }
