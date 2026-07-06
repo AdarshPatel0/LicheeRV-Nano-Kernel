@@ -29,7 +29,7 @@ SECTIONS
   .stack (NOLOAD) : ALIGN(4K)
   {
     _stack_bottom = .;
-    . += 0x100000;
+    . += 0x10000;
     _stack_top = .;
   }
   . = ALIGN(4K);

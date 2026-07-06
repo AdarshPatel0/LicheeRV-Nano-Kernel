@@ -8,6 +8,7 @@ use crate::print::println;
 mod context;
 mod drivers;
 mod ecall;
+mod hart;
 mod print;
 mod thread;
 mod trap_handler;
@@ -20,6 +21,7 @@ unsafe extern "C" {
 }
 
 pub const TIME_QUANTA: u64 = 1_000_000;
+pub const HART_STACK_SIZE: usize = 16384;
 
 #[global_allocator]
 pub static HEAP: buddy_system_allocator::LockedHeap<32> = buddy_system_allocator::LockedHeap::<32>::empty();
@@ -35,7 +37,7 @@ core::arch::global_asm!(
 );
 
 #[unsafe(no_mangle)]
-extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
+extern "C" fn kmain(hart_id: usize, fdt_address: usize) -> ! {
     // Clear .bss section
     {
         let bss_start = &raw mut _bss_start;
@@ -62,6 +64,24 @@ extern "C" fn kmain(_hart_id: usize, fdt_address: usize) -> ! {
         println!("start: {:#x}", heap_start);
         println!("end: {:#x}", heap_end);
         println!("size: {:#x}", heap_end - heap_start);
+    }
+    {
+        for cpu in fdt.cpus() {
+            let hart_id = cpu.ids().first();
+            let hart_stack_top = hart::create_hart_stack(hart_id);
+            if hart_id != hart_id {
+                unsafe {
+                    sbi::hart_state_management::hart_start(hart_id, sbi::PhysicalAddress::new(hart::hart_startup_entry as *const u8 as usize), hart_stack_top as usize as usize).unwrap();
+                }
+            }
+        }
+        let hart_stack_top = hart::create_hart_stack(hart_id);
+        unsafe {
+            riscv::interrupt::enable();
+            riscv::interrupt::enable_interrupt(riscv::interrupt::Interrupt::SupervisorTimer);
+            sbi::timer::set_timer(riscv::register::time::read64() + TIME_QUANTA).unwrap();
+            sbi::hart_state_management::hart_suspend(sbi::hart_state_management::SuspendType::DefaultNonRetentive { resume_address: sbi::PhysicalAddress::new(hart::hart_startup_entry as *const u8 as usize), opaque: hart_stack_top }).unwrap();
+        }
     }
     loop {
         riscv::asm::wfi();

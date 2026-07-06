@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use core::alloc::Layout;
 
 use alloc::{alloc::{alloc, dealloc}, collections::vec_deque::VecDeque};
