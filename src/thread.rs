@@ -109,7 +109,7 @@ pub fn schedule(context: &mut Context) {
         if let Some(current_thread) = threads.get_mut(current_thread_id) {
             queue.push_back(current_thread_id);
             current_thread.context = *context;
-            if current_thread.status != ThreadStatus::Dead && current_thread.status != ThreadStatus::Blocking {
+            if current_thread.status == ThreadStatus::Running {
                 current_thread.status = ThreadStatus::Ready;
             }
         }
@@ -118,7 +118,7 @@ pub fn schedule(context: &mut Context) {
     loop {
         if let Some(new_thread_id) = queue.pop_front() {
             if let Some(new_thread) = threads.get_mut(new_thread_id) {
-                if new_thread.status != ThreadStatus::Dead {
+                if new_thread.status == ThreadStatus::Ready {
                     *context = new_thread.context;
                     hart_info.current_thread_id = Some(new_thread_id);
                     new_thread.status = ThreadStatus::Running;

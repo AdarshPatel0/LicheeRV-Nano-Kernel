@@ -12,6 +12,7 @@ mod hart;
 mod print;
 mod thread;
 mod trap_handler;
+mod shell;
 
 unsafe extern "C" {
     static _kernel_end: u8;
@@ -65,6 +66,7 @@ extern "C" fn kmain(hart_id: usize, fdt_address: usize) -> ! {
         println!("end: {:#x}", heap_end);
         println!("size: {:#x}", heap_end - heap_start);
     }
+    // Initialize all harts.
     {
         for cpu in fdt.cpus() {
             let hart_id = cpu.ids().first();
@@ -95,4 +97,8 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     loop {
         riscv::asm::wfi();
     }
+}
+
+pub fn init() {
+    
 }

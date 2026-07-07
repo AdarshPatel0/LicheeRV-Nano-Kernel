@@ -1,4 +1,4 @@
-use alloc::sync::Arc;
+use alloc::{string::String, sync::Arc};
 use sdhci_host::Sdhci;
 use sdmmc_protocol::sdio::{CardInfo, SdioSdmmc};
 use spin::Mutex;
@@ -33,7 +33,7 @@ impl BlockDevice for SdhciBlockDevice {
 
     const BLOCK_SIZE: usize = 512;
 
-    fn read(&self, block_address: usize, buffer: &mut [u8]) {
+    fn read(&self, block_address: usize, buffer: &mut [u8]) -> Result<(), String> {
         assert!(buffer.len() % BLOCK_SIZE == 0);
         let mut card = self.card.lock();
         let block_count = buffer.len() / BLOCK_SIZE;
@@ -43,9 +43,10 @@ impl BlockDevice for SdhciBlockDevice {
             let mut read_request = card.submit_read_blocks_into((block + block_address) as u32, &mut sub_buffer).unwrap();
             while let sdmmc_protocol::DataCommandPoll::Pending = card.poll_data_request(&mut read_request).unwrap() {}
         }
+        return Ok(());
     }
 
-    fn write(&self, block_address: usize, buffer: &[u8]) {
+    fn write(&self, block_address: usize, buffer: &[u8]) -> Result<(), String> {
         assert!(buffer.len() % BLOCK_SIZE == 0);
         let mut card = self.card.lock();
         let block_count = buffer.len() / BLOCK_SIZE;
@@ -55,6 +56,7 @@ impl BlockDevice for SdhciBlockDevice {
             let mut write_request = card.submit_write_blocks_from((block + block_address) as u32, &sub_buffer).unwrap();
             while let sdmmc_protocol::DataCommandPoll::Pending = card.poll_data_request(&mut write_request).unwrap() {}
         }
+        return Ok(())
     }
     
     fn block_count(&self) -> usize {

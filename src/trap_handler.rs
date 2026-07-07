@@ -1,4 +1,4 @@
-use crate::{context, ecall};
+use crate::{context, ecall, thread::schedule};
 
 #[unsafe(no_mangle)]
 extern "C" fn trap_handler(context: &mut context::Context) {
@@ -8,6 +8,7 @@ extern "C" fn trap_handler(context: &mut context::Context) {
         riscv::interrupt::Trap::Interrupt(interrupt) => match interrupt {
             riscv::interrupt::Interrupt::SupervisorSoft => todo!(),
             riscv::interrupt::Interrupt::SupervisorTimer => {
+                schedule(context);
                 let time = riscv::register::time::read64();
                 sbi::timer::set_timer(time + crate::TIME_QUANTA).unwrap();
                 return;
