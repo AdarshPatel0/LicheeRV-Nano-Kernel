@@ -35,7 +35,7 @@ impl SdhciBlockDevice {
 impl BlockDevice for SdhciBlockDevice {
     const BLOCK_SIZE: usize = 512;
 
-    fn read(&self, block_address: usize, buffer: &mut [u8]) -> Result<(), BlockDeviceError<sdmmc_protocol::Error>> {
+    fn read(&self, block_address: usize, buffer: &mut [u8]) -> Result<(), BlockDeviceError<Self::Error>> {
         if buffer.len() % BLOCK_SIZE != 0 {
             return Err(BlockDeviceError::IllegalBufferLength(buffer.len()));
         }
@@ -64,7 +64,7 @@ impl BlockDevice for SdhciBlockDevice {
         return Ok(());
     }
 
-    fn write(&self, block_address: usize, buffer: &[u8]) -> Result<(), BlockDeviceError<sdmmc_protocol::Error>> {
+    fn write(&self, block_address: usize, buffer: &[u8]) -> Result<(), BlockDeviceError<Self::Error>> {
         assert!(buffer.len() % BLOCK_SIZE == 0);
         let mut card = self.card.lock();
         let block_count = buffer.len() / BLOCK_SIZE;

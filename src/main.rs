@@ -61,10 +61,10 @@ extern "C" fn kmain(hart_id: usize, fdt_address: usize) -> ! {
         let heap_start = &raw const _kernel_end as usize;
         let heap_end = memory_base + memory_size;
         unsafe { HEAP.lock().add_to_heap(heap_start, heap_end) };
-        println!("heap initialized");
-        println!("start: {:#x}", heap_start);
-        println!("end: {:#x}", heap_end);
-        println!("size: {:#x}", heap_end - heap_start);
+    }
+    // Create init thread
+    {
+        thread::create_thread(init as *const u8 as usize, true, 1 << 10, &[]);
     }
     // Initialize all harts.
     {
@@ -100,5 +100,5 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 }
 
 pub fn init() {
-    
+    println!("Kernel initialized");
 }
