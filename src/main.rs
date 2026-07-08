@@ -3,7 +3,7 @@
 
 extern crate alloc;
 
-use crate::print::println;
+use crate::print::{print, println};
 
 mod context;
 mod drivers;
@@ -12,7 +12,6 @@ mod hart;
 mod print;
 mod thread;
 mod trap_handler;
-mod shell;
 
 unsafe extern "C" {
     static _kernel_end: u8;
@@ -64,7 +63,7 @@ extern "C" fn kmain(hart_id: usize, fdt_address: usize) -> ! {
     }
     // Create init thread
     {
-        thread::create_thread(init as *const u8 as usize, true, 1 << 10, &[]);
+        thread::create_thread(init as *const u8 as usize, true, 1 << 20, &[]);
     }
     // Initialize all harts.
     {
@@ -99,6 +98,9 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     }
 }
 
-pub fn init() {
+pub fn init() -> ! {
     println!("Kernel initialized");
+    loop {
+        riscv::asm::wfi();
+    }
 }

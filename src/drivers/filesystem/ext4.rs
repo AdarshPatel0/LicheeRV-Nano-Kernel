@@ -14,8 +14,8 @@ pub struct Ext4FileSystem<T: BlockDevice> {
 }
 
 impl<T: BlockDevice> Ext4FileSystem<T> {
-    pub fn new(ext4_partition: Ext4Partition<T>) -> Self {
-        let mut jbd2_dev = rsext4::Jbd2Dev::initial_jbd2dev(0, ext4_partition, true);
+    pub fn new(partition: Ext4Partition<T>) -> Self {
+        let mut jbd2_dev = rsext4::Jbd2Dev::initial_jbd2dev(0, partition, true);
         let filesystem = rsext4::Ext4FileSystem::mount(&mut jbd2_dev).unwrap();
         Self { filesystem, jbd2_dev }
     }

@@ -5,7 +5,7 @@ use riscv::{
     register::stvec::{self, Stvec, TrapMode},
 };
 
-use crate::{HART_STACK_SIZE, TIME_QUANTA, print::println, trap_handler::trap_handler_entry};
+use crate::{HART_STACK_SIZE, TIME_QUANTA, trap_handler::trap_handler_entry};
 use alloc::alloc::alloc;
 
 #[repr(C)]
@@ -27,15 +27,14 @@ pub extern "C" fn hart_startup_entry() {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn hart_startup(hart_info: &mut HartInfo) -> ! {
+extern "C" fn hart_startup(_hart_info: &mut HartInfo) -> ! {
     unsafe {
         stvec::write(Stvec::new(trap_handler_entry as *const u8 as usize, TrapMode::Direct));
         interrupt::enable();
-        sbi::timer::set_timer(riscv::register::time::read64() + TIME_QUANTA).unwrap();
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorTimer);
         interrupt::enable_interrupt(interrupt::Interrupt::SupervisorExternal);
     }
-    println!("{}", hart_info.hart_id);
+    sbi::timer::set_timer(riscv::register::time::read64() + TIME_QUANTA).unwrap();
     loop {
         riscv::asm::wfi();
     }

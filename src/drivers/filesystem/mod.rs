@@ -15,6 +15,7 @@ pub trait FileSystem {
     fn mv(&mut self, source_path: &str, destination_path: &str) -> Result<(), FileSystemError<Self::Error>>;
 }
 
+#[derive(Debug)]
 pub enum FileSystemError<T: Error> {
     InvalidInput(T),
     AlreadyExists(T),

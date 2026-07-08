@@ -2,7 +2,10 @@
 
 use core::alloc::Layout;
 
-use alloc::{alloc::{alloc, dealloc}, collections::vec_deque::VecDeque};
+use alloc::{
+    alloc::{alloc, dealloc},
+    collections::vec_deque::VecDeque,
+};
 use slab::Slab;
 use spin::Mutex;
 
@@ -102,9 +105,7 @@ pub unsafe extern "C" fn wait() {
 pub fn schedule(context: &mut Context) {
     let mut threads = THREADS.lock();
     let mut queue = QUEUE.lock();
-
     let hart_info = get_hart_info();
-
     if let Some(current_thread_id) = hart_info.current_thread_id {
         if let Some(current_thread) = threads.get_mut(current_thread_id) {
             queue.push_back(current_thread_id);
@@ -114,7 +115,6 @@ pub fn schedule(context: &mut Context) {
             }
         }
     }
-
     loop {
         if let Some(new_thread_id) = queue.pop_front() {
             if let Some(new_thread) = threads.get_mut(new_thread_id) {
