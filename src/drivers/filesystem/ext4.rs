@@ -1,4 +1,6 @@
-use crate::drivers::block_device::BlockDevice;
+use core::{error::Error, fmt::Display};
+
+use crate::drivers::{block_device::BlockDevice, filesystem::FileSystem};
 
 pub struct Ext4FileSystem<T: BlockDevice> {
     pub filesystem: rsext4::Ext4FileSystem,
@@ -73,3 +75,16 @@ impl<T: BlockDevice> rsext4::BlockDevice for Ext4Partition<T> {
         false
     }
 }
+
+#[derive(Debug)]
+pub struct Ext4Error {
+    pub error: rsext4::Ext4Error,
+}
+
+impl Display for Ext4Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.error)
+    }
+}
+
+impl Error for Ext4Error {}
