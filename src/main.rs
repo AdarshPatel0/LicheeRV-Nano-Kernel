@@ -3,7 +3,7 @@
 
 extern crate alloc;
 
-use crate::print::{print, println};
+use crate::print::println;
 
 mod context;
 mod drivers;
